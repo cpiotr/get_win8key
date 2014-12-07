@@ -1,5 +1,6 @@
 import ctypes
 import ctypes.wintypes
+import sys
 
 #####################################################
 #script to query windows 8.x OEM key from PC firmware
@@ -26,7 +27,8 @@ def EnumAcpiTables():
 def FindAcpiTable(table):
 #checks if specific ACPI table exists and returns True/False
 	tables = EnumAcpiTables()
-	if str(table) in tables:
+
+	if table in tables:
 		return True
 	else:
 		return False
@@ -48,7 +50,7 @@ def GetAcpiTable(table,TableDwordID):
 	
 def GetWindowsKey():
 	#returns Windows Key as string
-	table="MSDM"
+	table=b'MSDM'
 	TableDwordID=1296323405
 	if FindAcpiTable(table)==True:
 		try:
@@ -57,18 +59,20 @@ def GetWindowsKey():
 			#byte offset 36 from beginning = Microsoft 'software licensing data structure' / 36 + 20 bytes offset from beginning = Win Key
 			return str(rawtable[56:len(rawtable)])
 		except:
+			print("Unexpected error:", sys.exc_info()[0])
 			return False
 	else:
-		print "[ERR] - ACPI table " + table + " not found on this system"
+		print ("[ERR] - ACPI table " + str(table) + " not found on this system")
 		return False
 	
 try:	
 	WindowsKey=GetWindowsKey()
 	if WindowsKey==False:
-		print "unexpected error"
+		print ("unexpected error")
 		exit(1)
 	else:
-		print str(WindowsKey)
+		print ((WindowsKey))
 except:
-	print "unexpected error"
+	print("Unexpected error:", sys.exc_info()[0])
 	exit(1)
+
